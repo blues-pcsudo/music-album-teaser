@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { usePlayer } from '../audio/usePlayer';
 import { formatTime, pad2, TRACKS, type TrackId } from '../data/tracks';
+import { getMostObservedTrackId, useTelemetry } from '../data/telemetry';
 
 interface Props {
   activeId: TrackId | null;
@@ -16,6 +17,9 @@ interface Props {
 export function TrackIndex({ activeId, hoverId, onHover, onSelect }: Props) {
   const [open, setOpen] = useState(false);
   const status = usePlayer((s) => s.status);
+  const resonances = useTelemetry((s) => s.resonances);
+  const topTrackId = getMostObservedTrackId(resonances);
+
   const toggleRef = useRef<HTMLButtonElement>(null);
   const listRef = useRef<HTMLOListElement>(null);
 
@@ -52,6 +56,8 @@ export function TrackIndex({ activeId, hoverId, onHover, onSelect }: Props) {
         {TRACKS.map((t) => {
           const active = t.id === activeId;
           const playing = active && (status === 'playing' || status === 'loading');
+          const isPeak = t.id === topTrackId;
+          const resCount = resonances[t.id] ?? 300;
           return (
             <li key={t.id}>
               <button
@@ -60,6 +66,7 @@ export function TrackIndex({ activeId, hoverId, onHover, onSelect }: Props) {
                 aria-current={active ? 'true' : undefined}
                 data-hover={t.id === hoverId || undefined}
                 data-playing={playing || undefined}
+                data-peak={isPeak || undefined}
                 onClick={() => {
                   setOpen(false);
                   onSelect(t.id);
@@ -70,8 +77,18 @@ export function TrackIndex({ activeId, hoverId, onHover, onSelect }: Props) {
                 onBlur={() => onHover(null)}
               >
                 <span className="index-num">{pad2(t.number)}</span>
-                <span className="index-title">{t.title}</span>
+                <span className="index-title">
+                  {t.title}
+                  {isPeak && (
+                    <span className="index-peak-star" title="Most observed track" aria-label="Most observed">
+                      ✦
+                    </span>
+                  )}
+                </span>
                 <span className="index-mark" aria-hidden="true" />
+                <span className="index-res" title={`${resCount} observer signals`}>
+                  ✧ {resCount}
+                </span>
                 <span className="index-dur">
                   {active ? <span className="sr-only">{playing ? 'Playing, ' : 'Current, '}</span> : null}
                   {formatTime(t.duration)}

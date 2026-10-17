@@ -4,13 +4,17 @@ import { SplashDiagram } from './SplashDiagram';
 import { SplashEngraving } from './SplashEngraving';
 import { SpotifyIcon, AppleMusicIcon, InstagramIcon, YouTubeIcon } from './BrandGlyphs';
 import { Starfield } from './Starfield';
+import { PresaveTelemetry } from './PresaveTelemetry';
+import { SignalTicker } from './SignalTicker';
+import { telemetry } from '../data/telemetry';
 import { SPOTIFY_PRESAVE_URL, APPLE_MUSIC_URL, APPLE_MUSIC_ARTIST_URL, type TrackId } from '../data/tracks';
 
 interface Props {
   onEnter: (trackId?: TrackId) => void;
+  onOpenPass: (trackId?: TrackId) => void;
 }
 
-export function SplashScreen({ onEnter }: Props) {
+export function SplashScreen({ onEnter, onOpenPass }: Props) {
   const [exiting, setExiting] = useState(false);
   const [zoomTarget, setZoomTarget] = useState<{cx: number, cy: number} | null>(null);
 
@@ -29,6 +33,10 @@ export function SplashScreen({ onEnter }: Props) {
       <SplashEngraving />
 
       <div className="splash-frame">
+        <SignalTicker
+          onSelectTrack={(id) => handleEnter(id)}
+          onOpenPass={() => onOpenPass()}
+        />
         
         <div className="splash-main-grid">
           
@@ -74,6 +82,7 @@ export function SplashScreen({ onEnter }: Props) {
           <div className="splash-lower-center">
             <div className="splash-presaves-wrapper">
               <div className="splash-presave-label">BE THERE FROM THE FIRST NOTE</div>
+              <PresaveTelemetry onOpenPass={() => onOpenPass()} />
               <div className="splash-presaves-editorial">
                 <a 
                   className="link-presave" 
@@ -81,6 +90,7 @@ export function SplashScreen({ onEnter }: Props) {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Pre-save ODUVIL on Spotify"
+                  onClick={() => telemetry.recordPresave('spotify')}
                 >
                   <SpotifyIcon />
                   <span className="link-presave-name">SPOTIFY</span>
@@ -98,6 +108,7 @@ export function SplashScreen({ onEnter }: Props) {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Pre-add ODUVIL on Apple Music"
+                  onClick={() => telemetry.recordPresave('apple')}
                 >
                   <AppleMusicIcon />
                   <span className="link-presave-name">APPLE MUSIC</span>

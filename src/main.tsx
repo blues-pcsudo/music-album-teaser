@@ -12,6 +12,7 @@ import './styles/controls.css';
 import './styles/room.css';
 import './styles/splash.css';
 import './styles/intro.css';
+import './styles/telemetry.css';
 import { App } from './App';
 
 createRoot(document.getElementById('root')!).render(

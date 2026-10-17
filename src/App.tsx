@@ -9,6 +9,8 @@ import { ListeningPanel } from './components/ListeningPanel';
 import { SplashScreen } from './components/SplashScreen';
 import { BrandIntro } from './components/BrandIntro';
 import { AudioReactiveBackground } from './components/AudioReactiveBackground';
+import { SignalTicker } from './components/SignalTicker';
+import { ObserverPassModal } from './components/ObserverPassModal';
 
 /**
  * The top-level composition.
@@ -21,6 +23,7 @@ export function App() {
   const [entered, setEntered] = useState(false);
   const [revealed, setRevealed] = useState(false);
   const [hoverId, setHoverId] = useState<TrackId | null>(null);
+  const [passTrackId, setPassTrackId] = useState<TrackId | null | undefined>(undefined);
   
   // Hook the app's active track directly to the player's internal state
   const playerActiveId = usePlayer((s) => s.currentId);
@@ -71,10 +74,19 @@ export function App() {
     player.pause();
   };
 
+  const handleOpenPass = (trackId?: TrackId) => {
+    setPassTrackId(trackId ?? playerActiveId ?? null);
+  };
+
   return (
     <>
       {!introComplete && <BrandIntro onComplete={handleIntroComplete} />}
-      {!entered && <SplashScreen onEnter={handleSplashEnter} />}
+      {!entered && (
+        <SplashScreen
+          onEnter={handleSplashEnter}
+          onOpenPass={handleOpenPass}
+        />
+      )}
 
       <header className="header" data-revealed={revealed || undefined}>
         <h1 
@@ -85,6 +97,12 @@ export function App() {
         >
           ODUVIL<span className="wordmark-dot">.</span>
         </h1>
+        <div className="header-telemetry">
+          <SignalTicker
+            onSelectTrack={handleSelect}
+            onOpenPass={() => handleOpenPass()}
+          />
+        </div>
       </header>
 
       <main className="main">
@@ -108,7 +126,18 @@ export function App() {
       </main>
 
       {roomOpen && activeId && (
-        <ListeningPanel id={activeId} onClose={() => setRoomOpen(false)} />
+        <ListeningPanel
+          id={activeId}
+          onClose={() => setRoomOpen(false)}
+          onOpenPass={(id) => handleOpenPass(id)}
+        />
+      )}
+
+      {passTrackId !== undefined && (
+        <ObserverPassModal
+          initialTrackId={passTrackId}
+          onClose={() => setPassTrackId(undefined)}
+        />
       )}
     </>
   );

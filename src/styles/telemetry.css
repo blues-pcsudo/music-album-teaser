@@ -1,0 +1,629 @@
+/* ==========================================================================
+   Observatory Telemetry, Social Proof, Resonance & Story Pass Generator
+   ========================================================================== */
+
+/* --- Live Signal Ticker --- */
+.signal-ticker {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  width: 100%;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid rgba(232, 226, 214, 0.08);
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.16em;
+  color: var(--c-fg-dim);
+  z-index: 5;
+}
+
+.header-telemetry {
+  flex: 1;
+  max-width: 760px;
+  margin-left: 2rem;
+}
+
+.header-telemetry .signal-ticker {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.signal-ticker-feed {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  min-width: 0;
+  animation: ticker-fade 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.signal-pulse {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--c-fg);
+  box-shadow: 0 0 8px rgba(232, 226, 214, 0.8);
+  flex-shrink: 0;
+  animation: pulse-glow 2.4s infinite ease-in-out;
+}
+
+.signal-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.signal-ticker-right {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  flex-shrink: 0;
+}
+
+.signal-peak-btn,
+.signal-pass-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  color: var(--c-fg-dim);
+  background: none;
+  border: 1px solid rgba(232, 226, 214, 0.14);
+  padding: 0.35rem 0.65rem;
+  cursor: pointer;
+  transition: color var(--t-fast), border-color var(--t-fast), background-color var(--t-fast);
+}
+
+.signal-peak-btn:hover,
+.signal-peak-btn:focus-visible,
+.signal-pass-btn:hover,
+.signal-pass-btn:focus-visible {
+  color: var(--c-fg);
+  border-color: var(--c-fg);
+  background: rgba(232, 226, 214, 0.05);
+}
+
+.signal-peak-star {
+  color: var(--c-fg);
+}
+
+/* --- Pre-save Telemetry & Milestone Progress Bar --- */
+.telemetry-presave {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.55rem;
+  width: 100%;
+  max-width: 440px;
+  padding: 0.75rem 1rem;
+  border: 1px solid rgba(232, 226, 214, 0.12);
+  background: rgba(232, 226, 214, 0.02);
+}
+
+.telemetry-presave[data-presaved] {
+  border-color: rgba(232, 226, 214, 0.32);
+  background: rgba(232, 226, 214, 0.045);
+}
+
+.telemetry-presave-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  color: var(--c-fg);
+}
+
+.telemetry-live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #d4cbb8;
+  box-shadow: 0 0 8px rgba(232, 226, 214, 0.9);
+  display: inline-block;
+  animation: pulse-glow 2s infinite ease-in-out;
+}
+
+.telemetry-presave-count strong {
+  font-weight: 600;
+  color: #fff;
+}
+
+.telemetry-sep {
+  color: var(--c-stroke);
+}
+
+.telemetry-milestone-hint {
+  color: var(--c-fg-dim);
+}
+
+.telemetry-badge-logged {
+  color: #fff;
+  background: rgba(232, 226, 214, 0.12);
+  padding: 0.15rem 0.45rem;
+  border: 1px solid rgba(232, 226, 214, 0.3);
+}
+
+.telemetry-bar {
+  width: 100%;
+  height: 2px;
+  background: var(--c-stroke);
+  position: relative;
+  overflow: hidden;
+}
+
+.telemetry-bar-fill {
+  height: 100%;
+  background: var(--c-fg);
+  transition: width 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.telemetry-presave-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  width: 100%;
+  font-family: var(--font-mono);
+  font-size: 0.54rem;
+  letter-spacing: 0.12em;
+  color: var(--c-fg-dimmer);
+}
+
+.telemetry-pass-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  letter-spacing: 0.14em;
+  color: var(--c-fg);
+  background: none;
+  border: none;
+  border-bottom: 1px solid rgba(232, 226, 214, 0.35);
+  padding: 0 0 1px 0;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color var(--t-fast), border-color var(--t-fast);
+}
+
+.telemetry-pass-trigger:hover,
+.telemetry-pass-trigger:focus-visible {
+  color: #fff;
+  border-bottom-color: #fff;
+}
+
+/* --- TrackIndex Resonance & Peak Star --- */
+.index-entry {
+  grid-template-columns: auto 1fr auto auto;
+  gap: 1.1rem;
+}
+
+.index-peak-star {
+  margin-left: 0.4rem;
+  font-size: 0.7rem;
+  color: var(--c-fg);
+}
+
+.index-res {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  color: var(--c-fg-dimmer);
+  font-variant-numeric: tabular-nums;
+}
+
+.index-entry:hover .index-res,
+.index-entry[data-peak] .index-res {
+  color: var(--c-fg-dim);
+}
+
+/* --- ListeningPanel Resonance, Classified Gate & Story Button --- */
+.room-meta-bar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.room-peak-badge {
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.18em;
+  color: var(--c-fg);
+  border: 1px solid rgba(232, 226, 214, 0.35);
+  background: rgba(232, 226, 214, 0.06);
+  padding: 0.2rem 0.55rem;
+}
+
+.room-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.room-resonate-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.15em;
+  color: var(--c-fg-dim);
+  background: rgba(232, 226, 214, 0.02);
+  border: 1px solid var(--c-stroke);
+  padding: 0.45rem 0.8rem;
+  cursor: pointer;
+  transition: all var(--t-fast);
+}
+
+.room-resonate-btn:hover,
+.room-resonate-btn:focus-visible {
+  color: var(--c-fg);
+  border-color: var(--c-fg-dim);
+}
+
+.room-resonate-btn[data-active] {
+  color: #fff;
+  border-color: var(--c-fg);
+  background: rgba(232, 226, 214, 0.1);
+}
+
+.room-resonate-count {
+  color: var(--c-fg);
+  padding-left: 0.35rem;
+  border-left: 1px solid var(--c-stroke);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Classified Transmission Box */
+.room-transmission {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  max-width: 440px;
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border: 1px solid rgba(232, 226, 214, 0.14);
+  background: rgba(232, 226, 214, 0.02);
+}
+
+.room-transmission-note {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 0.95rem;
+  color: var(--c-fg-dim);
+  line-height: 1.45;
+}
+
+.room-transmission-secret {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding-top: 0.6rem;
+  border-top: 1px dashed rgba(232, 226, 214, 0.14);
+}
+
+.room-transmission-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  letter-spacing: 0.15em;
+}
+
+.room-transmission-tag {
+  color: var(--c-fg);
+}
+
+.room-transmission-hint {
+  color: var(--c-fg-dimmer);
+}
+
+.room-transmission-cipher {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  line-height: 1.5;
+  color: var(--c-fg);
+  margin: 0;
+  filter: blur(4.5px);
+  user-select: none;
+  transition: filter 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.room-transmission[data-unlocked] .room-transmission-cipher {
+  filter: none;
+  user-select: text;
+}
+
+.room-presave-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  width: 100%;
+}
+
+.room-presave-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.15em;
+  color: var(--c-fg-dim);
+}
+
+/* --- Observer Pass / 9:16 Story Card Modal --- */
+.pass-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.pass-scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(5, 5, 5, 0.88);
+  backdrop-filter: blur(6px);
+}
+
+.pass-dialog {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 780px;
+  max-height: 92vh;
+  overflow-y: auto;
+  background: var(--c-surface);
+  border: 1px solid var(--c-stroke);
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  animation: room-slide-up var(--t-base) forwards;
+}
+
+.pass-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid var(--c-stroke);
+  padding-bottom: 1rem;
+}
+
+.pass-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  color: var(--c-fg-dimmer);
+}
+
+.pass-title {
+  font-family: var(--font-sans);
+  font-size: 1.35rem;
+  letter-spacing: 0.12em;
+  font-weight: 400;
+  color: var(--c-fg);
+  margin-top: 0.25rem;
+}
+
+.pass-close {
+  color: var(--c-fg-dim);
+  font-size: 1.1rem;
+  padding: 0.25rem 0.5rem;
+  cursor: pointer;
+}
+
+.pass-close:hover {
+  color: #fff;
+}
+
+.pass-body {
+  display: grid;
+  grid-template-columns: minmax(200px, 260px) 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+.pass-preview-wrap {
+  width: 100%;
+  aspect-ratio: 9 / 16;
+  border: 1px solid var(--c-stroke);
+  background: #050505;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pass-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.pass-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.pass-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.pass-label {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
+  color: var(--c-fg-dim);
+}
+
+.pass-track-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.pass-track-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  color: var(--c-fg-dim);
+  background: rgba(232, 226, 214, 0.02);
+  border: 1px solid var(--c-stroke);
+  padding: 0.45rem 0.75rem;
+  cursor: pointer;
+  transition: all var(--t-fast);
+}
+
+.pass-track-pill:hover,
+.pass-track-pill[data-active] {
+  color: #fff;
+  border-color: var(--c-fg);
+  background: rgba(232, 226, 214, 0.09);
+}
+
+.pass-hint {
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--c-fg-dim);
+  margin: 0;
+}
+
+.pass-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.pass-actions-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+}
+
+.pass-btn {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.16em;
+  color: var(--c-fg);
+  background: rgba(232, 226, 214, 0.03);
+  border: 1px solid var(--c-stroke);
+  padding: 0.8rem 1rem;
+  cursor: pointer;
+  text-align: center;
+  transition: all var(--t-fast);
+}
+
+.pass-btn:hover,
+.pass-btn:focus-visible {
+  border-color: var(--c-fg);
+  background: rgba(232, 226, 214, 0.09);
+  color: #fff;
+}
+
+.pass-btn--primary {
+  background: var(--c-fg);
+  color: var(--c-bg);
+  border-color: var(--c-fg);
+  font-weight: 600;
+}
+
+.pass-btn--primary:hover,
+.pass-btn--primary:focus-visible {
+  background: #fff;
+  color: #050505;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.45; transform: scale(0.92); }
+  50% { opacity: 1; transform: scale(1.1); }
+}
+
+@keyframes ticker-fade {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- Mobile Responsive Adjustments --- */
+@media (max-width: 900px) {
+  .signal-ticker {
+    padding-bottom: 0.5rem;
+    font-size: 0.54rem;
+    gap: 0.5rem;
+  }
+
+  .signal-peak-btn {
+    display: none;
+  }
+
+  .header-telemetry {
+    margin-left: 0;
+    width: 100%;
+    max-width: calc(100% - 5.5rem);
+  }
+
+  .telemetry-presave {
+    padding: 0.5rem 0.7rem;
+    gap: 0.4rem;
+  }
+
+  .telemetry-presave-row {
+    font-size: 0.55rem;
+  }
+
+  .telemetry-presave-footer {
+    font-size: 0.48rem;
+  }
+
+  .room-title-row {
+    justify-content: center;
+  }
+
+  .room-meta-bar {
+    justify-content: center;
+  }
+
+  .room-presave-status {
+    justify-content: center;
+  }
+
+  .room-transmission {
+    text-align: left;
+  }
+
+  .pass-dialog {
+    padding: 1.25rem;
+  }
+
+  .pass-body {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  .pass-preview-wrap {
+    max-width: 210px;
+    margin: 0 auto;
+  }
+}
