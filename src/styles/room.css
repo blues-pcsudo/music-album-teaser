@@ -1,0 +1,310 @@
+/* ==========================================================================
+   The Listening Room
+   ========================================================================== */
+
+.room {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.room-scrim {
+  position: absolute;
+  inset: 0;
+  background-color: var(--c-surface);
+  /* A subtle transition down to the surface color gives depth */
+  opacity: 0.95;
+  animation: room-fade-in var(--t-base) forwards;
+}
+
+.room[data-closing] .room-scrim {
+  animation: room-fade-out var(--t-fast) forwards;
+}
+
+.room-content {
+  position: relative;
+  width: 100%;
+  max-width: 1200px;
+  padding: 4rem 2.5rem;
+  display: flex;
+  align-items: center;
+  gap: 8rem;
+  /* Keep the UI elements separate from the FLIP symbol so they can fade independently */
+  animation: room-slide-up var(--t-base) forwards;
+}
+
+.room[data-closing] .room-content {
+  animation: room-slide-down var(--t-fast) forwards;
+}
+
+.room-back {
+  position: absolute;
+  top: 4rem;
+  left: 2.5rem;
+  opacity: 0.7;
+  transition: opacity var(--t-fast), color var(--t-fast);
+  color: var(--c-fg-dim);
+}
+
+.room-back:hover,
+.room-back:focus-visible {
+  opacity: 1;
+  color: #fff;
+}
+
+.room-art {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* 
+ * The inner container is animated by the FLIP hook in React.
+ * We set a sensible default size that matches our Plate proportions.
+ */
+.room-art-inner {
+  width: 100%;
+  max-width: 400px;
+  aspect-ratio: 1;
+}
+
+.room-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.room-unconfirmed {
+  opacity: 0.4;
+  margin-left: 0.1em;
+}
+
+.room-presave {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/* ==========================================================================
+   Audio Player Controls
+   ========================================================================== */
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem; /* Improved spacing */
+  max-width: 400px;
+  width: 100%;
+}
+
+.transport {
+  display: flex;
+  align-items: center;
+  gap: 2rem; /* Improved spacing between buttons */
+}
+
+.transport-btn {
+  opacity: 0.9; /* Increased contrast against black */
+  transition: opacity var(--t-fast), color var(--t-fast);
+  color: var(--c-fg-dim);
+}
+
+.transport-btn:hover:not(:disabled),
+.transport-btn:focus-visible {
+  opacity: 1;
+  color: var(--c-fg);
+}
+
+.transport-btn:disabled {
+  opacity: 0.2;
+}
+
+/* 
+ * Hairline Timeline 
+ * Uses a native range input stacked over decorative lines.
+ */
+.timeline {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem; /* Improved spacing around timestamps */
+  width: 100%;
+}
+
+.timeline[data-disabled] {
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.time {
+  min-width: 3rem;
+}
+.time--total {
+  text-align: right;
+  color: var(--c-fg-dim);
+}
+
+.line {
+  flex: 1;
+  position: relative;
+  height: 24px; /* comfortable touch target */
+  display: flex;
+  align-items: center;
+}
+
+/* The structural track */
+.line-base {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background-color: var(--c-stroke);
+}
+
+/* The filled progress */
+.line-fill {
+  position: absolute;
+  left: 0;
+  height: 1px;
+  background-color: var(--c-fg);
+  /* Driven by useProgressVar */
+  width: calc(var(--progress, 0) * 100%);
+  /* Don't transition width here so dragging feels immediate */
+}
+
+/* The tiny scrubber head */
+.line-head {
+  position: absolute;
+  left: calc(var(--progress, 0) * 100%);
+  width: 2px;
+  height: 8px;
+  background-color: var(--c-fg);
+  transform: translate(-50%, -50%);
+  top: 50%;
+  pointer-events: none; /* Let clicks pass to the input */
+  transition: transform var(--t-fast), height var(--t-fast);
+}
+
+/* The native range input (invisible, handles interaction and accessibility) */
+.line-input {
+  position: absolute;
+  inset: -10px 0; /* large vertical hit area */
+  opacity: 0;
+  cursor: pointer;
+  width: 100%;
+}
+
+.line-input:hover + .line-head,
+.line-input:focus-visible + .line-head,
+.line:has(.line-input:hover) .line-head,
+.line:has(.line-input:focus-visible) .line-head {
+  height: 12px;
+  background-color: #fff;
+}
+
+/* Error / Status region */
+.status {
+  min-height: 1.5rem; /* prevent layout shift */
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  color: var(--c-fg-dim);
+}
+
+.status-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.text-btn {
+  color: var(--c-fg);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.text-btn:hover {
+  color: #fff;
+}
+
+.controls[data-status="error"] .status {
+  color: var(--c-error);
+}
+
+/* ==========================================================================
+   Animations
+   ========================================================================== */
+
+@keyframes room-fade-in {
+  from { opacity: 0; }
+  to { opacity: 0.95; }
+}
+@keyframes room-fade-out {
+  from { opacity: 0.95; }
+  to { opacity: 0; }
+}
+
+@keyframes room-slide-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes room-slide-down {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(10px); }
+}
+
+/* ==========================================================================
+   Responsive
+   ========================================================================== */
+
+@media (max-width: 900px) {
+  .room {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .room-content {
+    flex-direction: column;
+    padding: 4.5rem 1.5rem calc(1.75rem + env(safe-area-inset-bottom, 0px));
+    gap: 1.75rem;
+  }
+  
+  .room-back {
+    top: 1.5rem;
+    left: 1.5rem;
+  }
+  
+  .room-art {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .room-art-inner {
+    max-width: min(55vw, 220px);
+  }
+  
+  .room-info {
+    width: 100%;
+    align-items: center;
+    text-align: center;
+    gap: 1.25rem;
+  }
+  
+  .controls {
+    align-items: center;
+    width: 100%;
+    gap: 1.5rem;
+  }
+
+  .room-presave {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+    width: 100%;
+    max-width: 400px;
+    gap: 0.65rem;
+  }
+}

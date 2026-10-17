@@ -1,0 +1,286 @@
+/* ==========================================================================
+   Base Layout & Opening Reveal
+   ========================================================================== */
+
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 2rem 2.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  z-index: 10;
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity var(--t-slow), transform var(--t-slow);
+}
+
+.header[data-revealed] {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.header-meta {
+  display: flex;
+  align-items: center;
+  gap: 3.5rem;
+}
+
+@media (max-width: 768px) {
+  .header-meta {
+    gap: 1.5rem;
+  }
+}
+
+.main {
+  flex: 1;
+  display: flex;
+  position: relative;
+}
+
+/* ==========================================================================
+   The Observatory Canvas
+   ========================================================================== */
+
+.canvas {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8rem 2.5rem 8rem; /* Increased bottom padding to prevent overlap */
+  opacity: 0;
+  transition: opacity var(--t-slow) 0.2s, transform var(--t-slow) 0.2s;
+  perspective: 1000px;
+}
+
+.canvas[data-revealed] {
+  opacity: 1;
+}
+
+/* 
+ * When the listening room opens, the canvas recedes slightly. 
+ * The active symbol is hidden on the canvas (it flies into the room).
+ */
+.canvas[data-receded] {
+  transform: scale(0.98);
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.obs[data-lifted] .obs-art {
+  opacity: 0;
+  transition: none; /* Instant hide so the FLIP clone can take over */
+}
+
+/* The Plate: an implicit rectangle containing the seven observations */
+.plate {
+  position: relative;
+  width: 100%;
+  max-width: 1200px;
+  /* Height determined by the composition plate ratio */
+  aspect-ratio: var(--plate-wide, 1.6);
+  max-height: 75vh;
+}
+
+/* Registration marks at the four corners */
+.plate-mark {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border: 1px solid var(--c-stroke);
+}
+.plate-mark--tl { top: 0; left: 0; border-right: none; border-bottom: none; }
+.plate-mark--tr { top: 0; right: 0; border-left: none; border-bottom: none; }
+.plate-mark--bl { bottom: 0; left: 0; border-right: none; border-top: none; }
+.plate-mark--br { bottom: 0; right: 0; border-left: none; border-top: none; }
+
+.observations {
+  position: absolute;
+  inset: 2rem;
+}
+
+/* 
+ * Each observation is absolutely positioned based on inline custom props
+ * injected by React from composition.ts.
+ */
+.obs {
+  position: absolute;
+  left: calc(var(--wx) * 1%);
+  top: calc(var(--wy) * 1%);
+  width: calc(var(--ww) * 1%);
+  /* Height follows the width and the SVG's intrinsic ratio */
+  height: calc(var(--ww) * 1% / var(--ratio));
+  transform: translate(-50%, -50%); /* Coordinates mark the center */
+}
+
+.obs-hit {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  text-align: left;
+}
+
+/* The visual SVG wrapper */
+.obs-art {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity var(--t-fast);
+}
+
+/* Generic .brackets removed in favor of bespoke SVG symbol selected states */
+
+/* 
+ * The textual label (number + title).
+ * Anchored to a specific point on the observation's bounding box.
+ */
+.obs-label {
+  position: absolute;
+  left: calc(var(--wlx) * 1%);
+  top: calc(var(--wly) * 1%);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  /* If dir is 'w', the label flows left from the anchor point */
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.obs[data-wdir="w"] .obs-label {
+  flex-direction: row-reverse;
+  transform: translate(-100%, -50%);
+}
+
+.obs-num {
+  color: var(--c-fg-dim);
+  transition: color var(--t-fast);
+}
+
+.obs-rule {
+  width: 0;
+  height: 1px;
+  background-color: var(--c-stroke);
+  transition: width var(--t-base);
+}
+
+.obs-text {
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  transform: translateX(10px);
+  transition: opacity var(--t-base), transform var(--t-base);
+  white-space: nowrap;
+}
+
+.obs[data-wdir="w"] .obs-text {
+  align-items: flex-end;
+  transform: translateX(-10px);
+}
+
+/* Only show touch hint when previewing on touch */
+.obs-open {
+  display: none;
+}
+.obs[data-preview] .obs-open {
+  display: block;
+}
+
+/* Reveal the label on hover/focus/active */
+.obs-hit:hover .obs-num,
+.obs-hit:focus-visible .obs-num,
+.obs[data-active] .obs-num,
+.obs[data-preview] .obs-num {
+  color: var(--c-fg);
+}
+
+.obs-hit:hover .obs-rule,
+.obs-hit:focus-visible .obs-rule,
+.obs[data-active] .obs-rule,
+.obs[data-preview] .obs-rule {
+  width: 1.5rem;
+}
+
+.obs-hit:hover .obs-text,
+.obs-hit:focus-visible .obs-text,
+.obs[data-active] .obs-text,
+.obs[data-preview] .obs-text {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* ==========================================================================
+   Responsive: Tablet Portrait & Mobile
+   Switch to the 'tall' composition coordinates.
+   ========================================================================== */
+
+@media (max-width: 900px) {
+  .header {
+    padding: 1.5rem;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
+  }
+  
+  .canvas {
+    padding: 6rem 1.5rem 8rem; /* Avoids bottom player overlap */
+  }
+  
+  .plate {
+    aspect-ratio: var(--plate-tall, 0.6);
+    max-height: 85vh;
+  }
+  
+  .obs {
+    left: calc(var(--tx) * 1%);
+    top: calc(var(--ty) * 1%);
+    width: calc(var(--tw) * 1%);
+    height: calc(var(--tw) * 1% / var(--ratio));
+  }
+  
+  .obs-label {
+    left: calc(var(--tlx) * 1%);
+    top: calc(var(--tly) * 1%);
+  }
+  
+  .obs[data-wdir="w"] .obs-label {
+    flex-direction: row;
+    transform: translateY(-50%);
+  }
+  .obs[data-wdir="w"] .obs-text {
+    align-items: flex-start;
+  }
+  
+  .obs[data-tdir="w"] .obs-label {
+    flex-direction: row-reverse;
+    transform: translate(-100%, -50%);
+  }
+  .obs[data-tdir="w"] .obs-text {
+    align-items: flex-end;
+    transform: translateX(-10px);
+  }
+  
+  /* Touch preview requires two taps; keep hover effects local to the element */
+  @media (hover: none) {
+    .obs-hit:hover .obs-rule { width: 0; }
+    .obs-hit:hover .obs-text { opacity: 0; transform: translateX(10px); }
+    .obs[data-tdir="w"] .obs-hit:hover .obs-text { transform: translateX(-10px); }
+    
+    .obs[data-preview] .obs-rule,
+    .obs[data-active] .obs-rule { width: 1.5rem; }
+    .obs[data-preview] .obs-text,
+    .obs[data-active] .obs-text { opacity: 1; transform: translateX(0); }
+  }
+}

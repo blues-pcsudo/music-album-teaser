@@ -1,0 +1,80 @@
+body {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.wordmark {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: 1.1rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.wordmark .wordmark-dot {
+  margin-left: -0.15em; /* Negate the letter spacing on the L */
+  letter-spacing: 0;
+}
+
+.subtitle {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  color: var(--c-fg-dim);
+}
+
+.obs-num,
+.index-num,
+.index-count,
+.room-num,
+.now-num,
+.time {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+}
+
+.obs-title,
+.index-title,
+.now-title {
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+
+.room-title {
+  font-family: var(--font-serif);
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  line-height: 1.1;
+}
+
+.obs-state,
+.now-time,
+.now-cue {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--c-fg-dim);
+  text-transform: lowercase;
+}
+
+.index-dur {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: currentColor;
+  text-transform: lowercase;
+}
+
+.status-text,
+.text-btn {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}

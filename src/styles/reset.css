@@ -1,0 +1,62 @@
+/* A bare-minimum reset to establish the canvas. */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  font: inherit;
+}
+
+html {
+  color-scheme: dark;
+  background-color: var(--c-bg);
+  color: var(--c-fg);
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  min-height: 100vh;
+  min-height: 100dvh;
+  /* Prevent overscroll bounce revealing white on mobile */
+  overscroll-behavior-y: none;
+  /* Subtle archival vignette without expensive live SVG feTurbulence filter */
+  background-image: radial-gradient(circle at center, transparent 0%, var(--c-bg) 100%);
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+img, picture, svg, video {
+  display: block;
+  max-width: 100%;
+}
+
+button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+ul, ol {
+  list-style: none;
+}
+
+/* Utilities */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

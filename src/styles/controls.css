@@ -1,0 +1,275 @@
+/* ==========================================================================
+   Glyphs
+   ========================================================================== */
+.glyph {
+  width: 24px;
+  height: 24px;
+  stroke: currentColor;
+  stroke-width: 1.4px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+}
+.glyph-fill {
+  fill: currentColor;
+  stroke: none;
+}
+
+/* ==========================================================================
+   Track Index (Side navigation)
+   ========================================================================== */
+
+.index {
+  position: fixed;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 2.5rem;
+  z-index: 20;
+}
+
+.index-toggle {
+  display: none; /* Hidden on desktop */
+}
+
+.index-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.index-entry {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 1.5rem;
+  width: 100%;
+  text-align: left;
+  color: var(--c-fg-dim);
+  padding: 0.5rem 0; /* Larger hit area */
+  cursor: pointer;
+  transition: color var(--t-fast);
+}
+
+.index-entry:hover,
+.index-entry:focus-visible,
+.index-entry[data-hover] {
+  color: var(--c-fg);
+}
+
+.index-entry[aria-current="true"] {
+  color: var(--c-fg);
+}
+
+.index-mark {
+  display: none; /* Removed in favor of pure color hierarchy */
+}
+
+/* ==========================================================================
+   Now Playing (Persistent bottom bar)
+   ========================================================================== */
+
+.now {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 1.5rem 2.5rem;
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  z-index: 10;
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity var(--t-base), transform var(--t-base);
+}
+
+.now[data-hidden] {
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+}
+
+.now-toggle {
+  opacity: 0.7;
+  transition: opacity var(--t-fast);
+}
+.now-toggle:hover,
+.now-toggle:focus-visible {
+  opacity: 1;
+}
+
+.now-open {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  flex: 1;
+  text-align: left;
+}
+
+.now-sep {
+  color: var(--c-stroke);
+}
+.now-cue {
+  margin-left: auto;
+  opacity: 0;
+  transition: opacity var(--t-fast);
+}
+.now-open:hover .now-cue,
+.now-open:focus-visible .now-cue {
+  opacity: 1;
+}
+
+.now-line {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  background-color: var(--c-fg);
+  /* Driven by useProgressVar */
+  width: calc(var(--progress, 0) * 100%);
+  transition: width 0.1s linear;
+}
+
+.btn-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--c-fg-dimmer);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: color var(--t-fast);
+  position: relative;
+  text-decoration: none;
+}
+
+.btn-back:hover,
+.btn-back:focus-visible {
+  color: var(--c-fg);
+}
+
+.btn-back::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background-color: var(--c-fg);
+  transition: width var(--t-base) cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-back:hover::after,
+.btn-back:focus-visible::after {
+  width: 100%;
+}
+
+.btn-back-icon {
+  display: block;
+  width: 12px;
+  height: 12px;
+}
+
+.btn-back-text-mobile {
+  display: none;
+}
+
+@media (max-width: 600px) {
+  .btn-back-text { display: none; }
+  .btn-back-text-mobile { display: inline; }
+}
+
+/* ==========================================================================
+   Responsive Navigation
+   ========================================================================== */
+
+@media (max-width: 900px) {
+  /* Index becomes a folding panel */
+  .index {
+    top: 1.5rem;
+    transform: none;
+    padding: 0;
+    right: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+  }
+
+  .index-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 0.5rem;
+    background: var(--c-bg);
+    border: 1px solid var(--c-stroke);
+    z-index: 2;
+  }
+
+  .index-list {
+    position: absolute;
+    top: calc(100% + 1rem);
+    right: 0;
+    background: var(--c-surface);
+    border: 1px solid var(--c-stroke);
+    padding: 1.5rem;
+    min-width: 240px;
+    opacity: 0;
+    transform: translateY(-10px);
+    pointer-events: none;
+    transition: opacity var(--t-fast), transform var(--t-fast);
+  }
+
+  .index[data-open] .index-list {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  
+  .index-scrim {
+    position: fixed;
+    inset: 0;
+    background: rgba(5, 5, 5, 0.8);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--t-fast);
+  }
+  .index[data-open] .index-scrim {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* Now playing bar gets taller on mobile for easy tapping */
+  .now {
+    padding: 1.5rem;
+    background: var(--c-bg);
+    border-top: 1px solid var(--c-stroke);
+  }
+  
+  .now-open {
+    flex-wrap: wrap;
+    row-gap: 0.25rem;
+  }
+  
+  .now-title {
+    width: auto;
+  }
+
+  .now-time {
+    width: 100%;
+    margin-left: 1.85rem;
+  }
+  
+  .now-cue {
+    display: none;
+  }
+}

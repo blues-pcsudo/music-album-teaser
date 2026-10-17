@@ -1,0 +1,38 @@
+:root {
+  /*
+   * Palette
+   * Background: absolute black fading to a very deep warm tone
+   * Text: tactile ivory, slightly aged
+   */
+  --c-bg: #050505;
+  --c-surface: #0a0a09;
+  --c-fg: #e8e2d6;
+  --c-fg-dim: #a8a195;
+  --c-fg-dimmer: #716d65;
+  --c-stroke: #36332f;
+  --c-focus: rgba(232, 226, 214, 0.2);
+  --c-error: #cc8a8a;
+
+  /* Typography */
+  --font-sans: 'Instrument Sans Variable', system-ui, sans-serif;
+  --font-serif: 'Newsreader Variable', Georgia, serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+  /* Transitions */
+  --t-fast: 0.2s cubic-bezier(0.2, 0, 0, 1);
+  --t-base: 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  --t-slow: 0.8s cubic-bezier(0.2, 0, 0, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --t-fast: 0s;
+    --t-base: 0s;
+    --t-slow: 0s;
+  }
+}
+
+:focus-visible {
+  outline: 1px solid var(--c-fg);
+  outline-offset: 4px;
+}

@@ -1,0 +1,14 @@
+.audio-reactive-bg {
+  /* Mix blend mode for beautiful layered glow over the dark UI */
+  mix-blend-mode: screen;
+}
+
+.audio-reactive-bg.is-active {
+  /* When active, it gently throbs */
+  animation: reactivePulse 10s ease-in-out infinite alternate;
+}
+
+@keyframes reactivePulse {
+  0% { transform: scale(1); filter: contrast(1); }
+  100% { transform: scale(1.05); filter: contrast(1.1); }
+}
