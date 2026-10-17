@@ -187,34 +187,7 @@ export function ListeningPanel({ id, onClose, onOpenPass }: Props) {
 
           <AudioControls playRef={playBtn} />
 
-          {/* Classified Transmission / Lyric & Mystery Title Gate */}
-          <div className="room-transmission" data-unlocked={hasPresaved || undefined}>
-            <div className="room-transmission-note">{transmission.fieldNote}</div>
-            <div className="room-transmission-secret">
-              <div className="room-transmission-header">
-                <span className="room-transmission-tag">
-                  {hasPresaved ? `✓ ${transmission.classifiedLabel}` : `🔒 ${transmission.classifiedLabel}`}
-                </span>
-                {!hasPresaved && (
-                  <span className="room-transmission-hint">PRE-SAVE BELOW TO DECRYPT</span>
-                )}
-              </div>
-              <p className="room-transmission-cipher">
-                {transmission.classifiedText}
-              </p>
-            </div>
-          </div>
-
           <div className="room-presave-section">
-            <div className="room-presave-status">
-              <span className="telemetry-live-dot" aria-hidden="true" />
-              <span>
-                {hasPresaved && observerNumber
-                  ? `VERIFIED OBSERVER #${observerNumber} · ${presaveCount.toLocaleString()} PRE-SAVED`
-                  : `${presaveCount.toLocaleString()} OBSERVERS PRE-SAVED SO FAR`}
-              </span>
-            </div>
-
             <div className="room-presave">
               <a
                 href={SPOTIFY_PRESAVE_URL}
@@ -254,6 +227,33 @@ export function ListeningPanel({ id, onClose, onOpenPass }: Props) {
                 <span className="link-presave-name">OBSERVER PASS</span>
                 <span className="link-presave-meta">9:16 STORY ↗</span>
               </button>
+            </div>
+
+            <div className="room-presave-status">
+              <span className="telemetry-live-dot" aria-hidden="true" />
+              <span>
+                {hasPresaved && observerNumber
+                  ? `VERIFIED OBSERVER #${observerNumber} · ${presaveCount.toLocaleString()} PRE-SAVED`
+                  : `${presaveCount.toLocaleString()} OBSERVERS PRE-SAVED SO FAR`}
+              </span>
+            </div>
+          </div>
+
+          {/* Classified Transmission / Lyric & Mystery Title Gate */}
+          <div className="room-transmission" data-unlocked={hasPresaved || undefined}>
+            <div className="room-transmission-note">{transmission.fieldNote}</div>
+            <div className="room-transmission-secret">
+              <div className="room-transmission-header">
+                <span className="room-transmission-tag">
+                  {hasPresaved ? `✓ ${transmission.classifiedLabel}` : `🔒 ${transmission.classifiedLabel}`}
+                </span>
+                {!hasPresaved && (
+                  <span className="room-transmission-hint">PRE-SAVE ABOVE TO DECRYPT</span>
+                )}
+              </div>
+              <p className="room-transmission-cipher">
+                {transmission.classifiedText}
+              </p>
             </div>
           </div>
         </div>

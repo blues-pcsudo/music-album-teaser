@@ -82,7 +82,6 @@ export function SplashScreen({ onEnter, onOpenPass }: Props) {
           <div className="splash-lower-center">
             <div className="splash-presaves-wrapper">
               <div className="splash-presave-label">BE THERE FROM THE FIRST NOTE</div>
-              <PresaveTelemetry onOpenPass={() => onOpenPass()} />
               <div className="splash-presaves-editorial">
                 <a 
                   className="link-presave" 
@@ -118,6 +117,7 @@ export function SplashScreen({ onEnter, onOpenPass }: Props) {
                   </svg>
                 </a>
               </div>
+              <PresaveTelemetry onOpenPass={() => onOpenPass()} />
             </div>
           </div>
 
