@@ -6,51 +6,42 @@ interface Props {
 }
 
 /**
- * Displays live pre-save social proof, milestone progress bar, and the user's
- * personal Observer # badge once they click Spotify Pre-Save or Apple Music Pre-Add.
+ * Displays randomized live observatory telemetry, active observer count, and the
+ * visitor's assigned random Observer # badge.
  */
 export function PresaveTelemetry({ compact = false, onOpenPass }: Props) {
-  const presaveCount = useTelemetry((s) => s.presaveCount);
+  const observerCount = useTelemetry((s) => s.presaveCount);
+  const activeNow = useTelemetry((s) => s.activeNow);
   const milestoneTarget = useTelemetry((s) => s.milestoneTarget);
   const hasPresaved = useTelemetry((s) => s.hasPresaved);
   const observerNumber = useTelemetry((s) => s.observerNumber);
 
-  // Calculate progress between 1000 baseline and milestoneTarget
-  const baseline = milestoneTarget - 500;
+  const baseline = Math.max(0, milestoneTarget - 600);
   const pct = Math.min(
     100,
-    Math.max(8, ((presaveCount - baseline) / (milestoneTarget - baseline)) * 100)
+    Math.max(12, ((observerCount - baseline) / (milestoneTarget - baseline)) * 100)
   );
-  const remaining = Math.max(0, milestoneTarget - presaveCount);
 
   return (
     <div className="telemetry-presave" data-compact={compact || undefined} data-presaved={hasPresaved || undefined}>
       <div className="telemetry-presave-row">
         <span className="telemetry-live-dot" aria-hidden="true" />
         <span className="telemetry-presave-count">
-          <strong>{presaveCount.toLocaleString()}</strong> OBSERVERS PRE-SAVED
+          <strong>{observerCount.toLocaleString()}</strong> OBSERVERS LOGGED
         </span>
         <span className="telemetry-sep" aria-hidden="true">·</span>
-        {hasPresaved && observerNumber ? (
-          <span className="telemetry-badge-logged">
-            LOGGED AS OBSERVER #{observerNumber}
-          </span>
-        ) : (
-          <span className="telemetry-milestone-hint">
-            {remaining} TO {milestoneTarget.toLocaleString()} MILESTONE
-          </span>
-        )}
+        <span className="telemetry-badge-logged">
+          YOU ARE OBSERVER #{observerNumber}
+        </span>
       </div>
 
-      <div className="telemetry-bar" role="progressbar" aria-valuenow={presaveCount} aria-valuemin={baseline} aria-valuemax={milestoneTarget} aria-label="Pre-save milestone progress">
+      <div className="telemetry-bar" role="progressbar" aria-valuenow={observerCount} aria-valuemin={baseline} aria-valuemax={milestoneTarget} aria-label="Observatory milestone progress">
         <div className="telemetry-bar-fill" style={{ width: `${pct.toFixed(1)}%` }} />
       </div>
 
       <div className="telemetry-presave-footer">
         <span className="telemetry-unlock-caption">
-          {hasPresaved
-            ? '✓ CLASSIFIED TRACK TRANSMISSIONS UNLOCKED'
-            : 'PRE-SAVE TO UNLOCK CLASSIFIED LYRIC & TITLE ARCHIVES'}
+          {activeNow} OBSERVERS ACTIVE NOW · NEXT MILESTONE {milestoneTarget.toLocaleString()}
         </span>
         {onOpenPass && (
           <button
@@ -58,7 +49,7 @@ export function PresaveTelemetry({ compact = false, onOpenPass }: Props) {
             className="telemetry-pass-trigger"
             onClick={onOpenPass}
           >
-            <span>{hasPresaved ? 'GET OBSERVER PASS' : 'SHARE STORY CARD'}</span>
+            <span>OBSERVER PASS #{observerNumber}</span>
             <span aria-hidden="true">↗</span>
           </button>
         )}

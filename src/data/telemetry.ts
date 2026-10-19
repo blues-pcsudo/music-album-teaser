@@ -8,35 +8,40 @@ export interface SignalEvent {
 }
 
 export interface TelemetryState {
+  /** Total randomized observers logged in the observatory */
   presaveCount: number;
+  /** Live active observers currently tuning in (randomized) */
+  activeNow: number;
   milestoneTarget: number;
   hasPresaved: boolean;
-  observerNumber: number | null;
+  /** Randomly assigned Observer ID for this visitor */
+  observerNumber: number;
   presavePlatform: 'spotify' | 'apple' | null;
   resonances: Record<TrackId, number>;
   userResonated: Partial<Record<TrackId, boolean>>;
+  decryptedTracks: Partial<Record<TrackId, boolean>>;
   currentSignal: SignalEvent;
 }
 
-const STORAGE_KEY = 'oduvil_observatory_telemetry_v1';
+const STORAGE_KEY = 'oduvil_observatory_telemetry_v2';
 
-// Baseline counts per track so the teaser site feels active from day one
+// Baseline ranges per track — randomized on first load so counts feel organic
 const BASE_RESONANCES: Record<TrackId, number> = {
-  slowly: 312,
-  omale: 389,
-  dopamine: 464,
-  melle: 298,
-  ormakal: 341,
-  pathiye: 276,
-  ormayil: 354,
+  slowly: 310,
+  omale: 390,
+  dopamine: 460,
+  melle: 295,
+  ormakal: 340,
+  pathiye: 275,
+  ormayil: 355,
 };
 
 // Poetic observatory notes & classified transmissions for each track
 export interface TrackTransmission {
-   catalogCode: string;
+  catalogCode: string;
   /** Publicly visible poetic coordinate / vibe note */
   fieldNote: string;
-  /** Secret lyric fragment or title cipher unlocked after Pre-Save */
+  /** Secret lyric fragment or title cipher */
   classifiedText: string;
   /** Label for the classified box */
   classifiedLabel: string;
@@ -46,25 +51,25 @@ export const TRACK_TRANSMISSIONS: Record<TrackId, TrackTransmission> = {
   slowly: {
     catalogCode: 'OBS-01 // RA 04h 21m',
     fieldNote: 'First light entering the aperture. A slow gravitational pull.',
-    classifiedLabel: 'DECRYPTED LYRIC FRAGMENT',
+    classifiedLabel: 'ARCHIVE LYRIC FRAGMENT',
     classifiedText: '“Every orbit starts with a quiet hesitation before the fall…”',
   },
   omale: {
     catalogCode: 'OBS-02 // RA 07h 14m',
     fieldNote: 'Warmth across light-years. Familiar frequencies returning home.',
-    classifiedLabel: 'DECRYPTED LYRIC FRAGMENT',
+    classifiedLabel: 'ARCHIVE LYRIC FRAGMENT',
     classifiedText: '“Omale — a signal carried across the stillness between us.”',
   },
   dopamine: {
     catalogCode: 'OBS-03 // RA 11h 48m',
     fieldNote: 'Peak solar flare. High-velocity pulse in the center of the plate.',
-    classifiedLabel: 'DECRYPTED STUDIO NOTE',
+    classifiedLabel: 'ARCHIVE STUDIO NOTE',
     classifiedText: '“Recorded at 124 BPM — the brightest burst inside the supernova.”',
   },
   melle: {
     catalogCode: 'OBS-04 // RA 14h 09m',
     fieldNote: 'Soft drift through nebular dust. Weightless and unhurried.',
-    classifiedLabel: 'DECRYPTED LYRIC FRAGMENT',
+    classifiedLabel: 'ARCHIVE LYRIC FRAGMENT',
     classifiedText: '“Melle, let the night fold around what we could not say aloud.”',
   },
   ormakal: {
@@ -82,7 +87,7 @@ export const TRACK_TRANSMISSIONS: Record<TrackId, TrackTransmission> = {
   ormayil: {
     catalogCode: 'OBS-07 // RA 22h 59m',
     fieldNote: 'Final afterglow of the supernova. Everything that stays behind.',
-    classifiedLabel: 'DECRYPTED LYRIC FRAGMENT',
+    classifiedLabel: 'ARCHIVE LYRIC FRAGMENT',
     classifiedText: '“In the memory that outlives the star — Oduvil, finally.”',
   },
 };
@@ -100,28 +105,35 @@ const CITIES = [
   'TORONTO',
 ];
 
-function computeBasePresaves(): number {
-  // Deterministic gentle growth based on time so the counter feels alive
-  const anchor = new Date('2026-10-09T00:00:00Z').getTime();
-  const now = Date.now();
-  const elapsedHours = Math.max(0, Math.floor((now - anchor) / (1000 * 60 * 20)));
-  return 1412 + (elapsedHours % 75);
+function randomInt(min: number, max: number): number {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function generateAmbientSignal(presaveCount: number): SignalEvent {
-  const city = CITIES[Math.floor(Math.random() * CITIES.length)];
-  const track = TRACKS[Math.floor(Math.random() * TRACKS.length)];
+function computeRandomObserverCount(): number {
+  // Generate a natural random observer count between 1,180 and 2,460
+  return randomInt(1180, 2460);
+}
+
+function computeMilestone(count: number): number {
+  if (count < 1500) return 1500;
+  if (count < 2000) return 2000;
+  if (count < 2500) return 2500;
+  return Math.ceil((count + 100) / 500) * 500;
+}
+
+function generateAmbientSignal(observerCount: number, activeNow: number): SignalEvent {
+  const city = CITIES[randomInt(0, CITIES.length - 1)];
+  const track = TRACKS[randomInt(0, TRACKS.length - 1)];
   const roll = Math.random();
 
   let text: string;
-  if (roll < 0.42) {
+  if (roll < 0.45) {
     text = `SIGNAL DETECTED · ${city} · OBSERVING "${track.title.toUpperCase()}"`;
   } else if (roll < 0.78) {
-    const obsNum = presaveCount - Math.floor(Math.random() * 6);
-    const platform = Math.random() > 0.35 ? 'SPOTIFY' : 'APPLE MUSIC';
-    text = `OBSERVER #${obsNum} · PRE-SAVED ON ${platform}`;
+    const randomObs = randomInt(104, observerCount);
+    text = `OBSERVER #${randomObs} · TUNED IN FROM ${city}`;
   } else {
-    text = `RESONANCE PULSE · ${city} · +1 SIGNAL ON ${track.number.toString().padStart(2, '0')} ${track.title.toUpperCase()}`;
+    text = `TELEMETRY · ${activeNow} OBSERVERS CURRENTLY ACTIVE IN THE ROOM`;
   }
 
   return {
@@ -137,7 +149,6 @@ class TelemetryStore {
   private intervalId: number | null = null;
 
   constructor() {
-    const basePresaves = computeBasePresaves();
     let saved: Partial<TelemetryState> = {};
 
     try {
@@ -152,35 +163,44 @@ class TelemetryStore {
     const userResonated = saved.userResonated ?? {};
     const resonances = { ...BASE_RESONANCES };
     for (const id of Object.keys(resonances) as TrackId[]) {
-      if (saved.resonances?.[id] && saved.resonances[id] > resonances[id]) {
+      if (saved.resonances?.[id]) {
         resonances[id] = saved.resonances[id];
-      } else if (userResonated[id]) {
-        resonances[id] += 1;
+      } else {
+        // Add random variance (-25 to +85) so counts don't look static or hardcoded
+        resonances[id] = BASE_RESONANCES[id] + randomInt(-25, 85);
       }
     }
 
     const hasPresaved = Boolean(saved.hasPresaved);
-    const presaveCount = Math.max(
-      basePresaves + (hasPresaved ? 1 : 0),
-      saved.presaveCount ?? 0
-    );
+    const presaveCount = saved.presaveCount
+      ? saved.presaveCount + randomInt(1, 9)
+      : computeRandomObserverCount();
 
-    const milestoneTarget = presaveCount >= 1500 ? 2000 : 1500;
+    // Assign every visitor a random Observer ID right away
+    const observerNumber =
+      saved.observerNumber ?? randomInt(Math.max(101, presaveCount - 650), presaveCount);
+
+    const activeNow = randomInt(14, 48);
+    const milestoneTarget = computeMilestone(presaveCount);
 
     this.state = {
       presaveCount,
+      activeNow,
       milestoneTarget,
       hasPresaved,
-      observerNumber: saved.observerNumber ?? null,
+      observerNumber,
       presavePlatform: saved.presavePlatform ?? null,
       resonances,
       userResonated,
+      decryptedTracks: saved.decryptedTracks ?? {},
       currentSignal: {
         id: 'init',
-        text: `OBSERVATORY ONLINE · ${presaveCount.toLocaleString()} OBSERVERS LOGGED`,
+        text: `OBSERVATORY ONLINE · ASSIGNED AS OBSERVER #${observerNumber}`,
         timestamp: Date.now(),
       },
     };
+
+    this.persist();
 
     if (typeof window !== 'undefined') {
       this.startAmbientFeed();
@@ -190,20 +210,31 @@ class TelemetryStore {
   private startAmbientFeed() {
     if (this.intervalId) return;
     this.intervalId = window.setInterval(() => {
-      // Occasionally increment ambient pre-save or resonance to keep the room alive
-      const bumpPresave = Math.random() < 0.22;
-      const nextCount = bumpPresave ? this.state.presaveCount + 1 : this.state.presaveCount;
-      const nextSignal = generateAmbientSignal(nextCount);
+      // Randomly fluctuate active listeners and occasionally bump total observers
+      const bumpTotal = Math.random() < 0.35 ? randomInt(1, 3) : 0;
+      const nextCount = this.state.presaveCount + bumpTotal;
+      const deltaActive = randomInt(-2, 3);
+      const nextActive = Math.max(9, Math.min(84, this.state.activeNow + deltaActive));
+      const nextSignal = generateAmbientSignal(nextCount, nextActive);
+
+      // Occasionally bump a random track's signal count
+      const nextResonances = { ...this.state.resonances };
+      if (Math.random() < 0.4) {
+        const randomTrack = TRACKS[randomInt(0, TRACKS.length - 1)].id;
+        nextResonances[randomTrack] = (nextResonances[randomTrack] ?? 300) + 1;
+      }
 
       this.state = {
         ...this.state,
         presaveCount: nextCount,
-        milestoneTarget: nextCount >= 1500 ? 2000 : 1500,
+        activeNow: nextActive,
+        milestoneTarget: computeMilestone(nextCount),
+        resonances: nextResonances,
         currentSignal: nextSignal,
       };
       this.persist();
       this.emit();
-    }, 6500);
+    }, 5500);
   }
 
   private persist() {
@@ -217,6 +248,7 @@ class TelemetryStore {
           presavePlatform: this.state.presavePlatform,
           resonances: this.state.resonances,
           userResonated: this.state.userResonated,
+          decryptedTracks: this.state.decryptedTracks,
         })
       );
     } catch {
@@ -240,20 +272,30 @@ class TelemetryStore {
   recordPresave = (platform: 'spotify' | 'apple') => {
     const already = this.state.hasPresaved;
     const nextCount = already ? this.state.presaveCount : this.state.presaveCount + 1;
-    const observerNumber = this.state.observerNumber ?? nextCount;
     const platformName = platform === 'spotify' ? 'SPOTIFY' : 'APPLE MUSIC';
 
     this.state = {
       ...this.state,
       hasPresaved: true,
       presaveCount: nextCount,
-      milestoneTarget: nextCount >= 1500 ? 2000 : 1500,
-      observerNumber,
+      milestoneTarget: computeMilestone(nextCount),
       presavePlatform: platform,
       currentSignal: {
         id: `presave-${Date.now()}`,
-        text: `YOU ARE LOGGED AS OBSERVER #${observerNumber} · ${platformName} PRE-SAVE CONFIRMED`,
+        text: `OBSERVER #${this.state.observerNumber} · OPENED ${platformName} PRE-RELEASE`,
         timestamp: Date.now(),
+      },
+    };
+    this.persist();
+    this.emit();
+  };
+
+  decryptTrack = (id: TrackId) => {
+    this.state = {
+      ...this.state,
+      decryptedTracks: {
+        ...this.state.decryptedTracks,
+        [id]: true,
       },
     };
     this.persist();
@@ -289,15 +331,7 @@ class TelemetryStore {
   };
 
   ensureObserverNumber = (): number => {
-    if (this.state.observerNumber) return this.state.observerNumber;
-    const num = this.state.presaveCount + 1;
-    this.state = {
-      ...this.state,
-      observerNumber: num,
-    };
-    this.persist();
-    this.emit();
-    return num;
+    return this.state.observerNumber;
   };
 }
 

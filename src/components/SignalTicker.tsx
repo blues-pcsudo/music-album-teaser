@@ -46,9 +46,7 @@ export function SignalTicker({ onSelectTrack, onOpenPass }: Props) {
             className="signal-pass-btn"
             onClick={onOpenPass}
           >
-            {hasPresaved && observerNumber
-              ? `OBSERVER #${observerNumber} · PASS ↗`
-              : 'OBSERVER PASS ↗'}
+            {`OBSERVER #${observerNumber} · PASS ↗`}
           </button>
         )}
       </div>

@@ -38,6 +38,8 @@ export function ListeningPanel({ id, onClose, onOpenPass }: Props) {
 
   const isMostObserved = getMostObservedTrackId(resonances) === id;
   const resonanceCount = resonances[id] ?? 300;
+  const isDecrypted = useTelemetry((s) => Boolean(s.hasPresaved || s.decryptedTracks[id]));
+  const activeNow = useTelemetry((s) => s.activeNow);
 
   const playBtn = useRef<HTMLButtonElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -232,23 +234,26 @@ export function ListeningPanel({ id, onClose, onOpenPass }: Props) {
             <div className="room-presave-status">
               <span className="telemetry-live-dot" aria-hidden="true" />
               <span>
-                {hasPresaved && observerNumber
-                  ? `VERIFIED OBSERVER #${observerNumber} · ${presaveCount.toLocaleString()} PRE-SAVED`
-                  : `${presaveCount.toLocaleString()} OBSERVERS PRE-SAVED SO FAR`}
+                OBSERVER #{observerNumber} · {presaveCount.toLocaleString()} OBSERVERS LOGGED ({activeNow} ACTIVE NOW)
               </span>
             </div>
           </div>
 
           {/* Classified Transmission / Lyric & Mystery Title Gate */}
-          <div className="room-transmission" data-unlocked={hasPresaved || undefined}>
+          <div
+            className="room-transmission"
+            data-unlocked={isDecrypted || undefined}
+            onClick={!isDecrypted ? () => telemetry.decryptTrack(id) : undefined}
+            style={{ cursor: !isDecrypted ? 'pointer' : 'default' }}
+          >
             <div className="room-transmission-note">{transmission.fieldNote}</div>
             <div className="room-transmission-secret">
               <div className="room-transmission-header">
                 <span className="room-transmission-tag">
-                  {hasPresaved ? `✓ ${transmission.classifiedLabel}` : `🔒 ${transmission.classifiedLabel}`}
+                  {isDecrypted ? `✓ ${transmission.classifiedLabel}` : `🔒 ${transmission.classifiedLabel}`}
                 </span>
-                {!hasPresaved && (
-                  <span className="room-transmission-hint">PRE-SAVE ABOVE TO DECRYPT</span>
+                {!isDecrypted && (
+                  <span className="room-transmission-hint">TAP OR PRE-SAVE TO DECRYPT</span>
                 )}
               </div>
               <p className="room-transmission-cipher">
