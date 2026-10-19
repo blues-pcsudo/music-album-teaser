@@ -32,7 +32,6 @@ export function ListeningPanel({ id, onClose, onOpenPass }: Props) {
   const transmission = TRACK_TRANSMISSIONS[id];
   const resonances = useTelemetry((s) => s.resonances);
   const userResonated = useTelemetry((s) => Boolean(s.userResonated[id]));
-  const hasPresaved = useTelemetry((s) => s.hasPresaved);
   const presaveCount = useTelemetry((s) => s.presaveCount);
   const observerNumber = useTelemetry((s) => s.observerNumber);
 

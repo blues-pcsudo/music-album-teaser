@@ -13,7 +13,6 @@ interface Props {
 export function SignalTicker({ onSelectTrack, onOpenPass }: Props) {
   const signal = useTelemetry((s) => s.currentSignal);
   const resonances = useTelemetry((s) => s.resonances);
-  const hasPresaved = useTelemetry((s) => s.hasPresaved);
   const observerNumber = useTelemetry((s) => s.observerNumber);
 
   const topTrackId = getMostObservedTrackId(resonances);
