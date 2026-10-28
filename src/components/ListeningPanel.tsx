@@ -1,6 +1,12 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useReducedMotion } from '../hooks/useReducedMotion';
 import { pad2, getTrack, SPOTIFY_PRESAVE_URL, APPLE_MUSIC_URL, type TrackId } from '../data/tracks';
+import {
+  getMostObservedTrackId,
+  telemetry,
+  TRACK_TRANSMISSIONS,
+  useTelemetry,
+} from '../data/telemetry';
 import { AudioControls } from './AudioControls';
 import { ReturnGlyph } from './Glyphs';
 import { SpotifyIcon, AppleMusicIcon } from './BrandGlyphs';
@@ -10,6 +16,7 @@ import { CelestialSymbol } from './symbols';
 interface Props {
   id: TrackId;
   onClose: () => void;
+  onOpenPass: (id: TrackId) => void;
 }
 
 /**
@@ -19,9 +26,20 @@ interface Props {
  * plate and into the room, preserving visual continuity. When closed, it
  * flies back and restores keyboard focus to the observation button.
  */
-export function ListeningPanel({ id, onClose }: Props) {
+export function ListeningPanel({ id, onClose, onOpenPass }: Props) {
   const [closing, setClosing] = useState(false);
   const track = getTrack(id);
+  const transmission = TRACK_TRANSMISSIONS[id];
+  const resonances = useTelemetry((s) => s.resonances);
+  const userResonated = useTelemetry((s) => Boolean(s.userResonated[id]));
+  const presaveCount = useTelemetry((s) => s.presaveCount);
+  const observerNumber = useTelemetry((s) => s.observerNumber);
+
+  const isMostObserved = getMostObservedTrackId(resonances) === id;
+  const resonanceCount = resonances[id] ?? 300;
+  const isDecrypted = useTelemetry((s) => Boolean(s.hasPresaved || s.decryptedTracks[id]));
+  const activeNow = useTelemetry((s) => s.activeNow);
+
   const playBtn = useRef<HTMLButtonElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const motion = useReducedMotion();
@@ -135,43 +153,112 @@ export function ListeningPanel({ id, onClose }: Props) {
         </div>
 
         <div className="room-info">
-          <span className="room-num" aria-hidden="true">
-            {pad2(track.number)}
-          </span>
-          <h2 className="room-title">
-            {track.title}
-            {!track.titleConfirmed && <span className="room-unconfirmed" aria-label="Title incomplete">...</span>}
-          </h2>
+          <div className="room-meta-bar">
+            <span className="room-num" aria-hidden="true">
+              {pad2(track.number)} // {transmission.catalogCode}
+            </span>
+            {isMostObserved && (
+              <span className="room-peak-badge">✦ MOST OBSERVED</span>
+            )}
+          </div>
+
+          <div className="room-title-row">
+            <h2 className="room-title">
+              {track.title}
+              {!track.titleConfirmed && <span className="room-unconfirmed" aria-label="Title incomplete">...</span>}
+            </h2>
+
+            <button
+              type="button"
+              className="room-resonate-btn"
+              data-active={userResonated || undefined}
+              onClick={() => telemetry.toggleResonance(id)}
+              aria-pressed={userResonated}
+              title={userResonated ? 'Signal transmitted' : 'Send resonance signal for this track'}
+            >
+              <span className="room-resonate-icon" aria-hidden="true">
+                {userResonated ? '✦' : '✧'}
+              </span>
+              <span className="room-resonate-label">
+                {userResonated ? 'SIGNAL SENT' : 'RESONATE'}
+              </span>
+              <span className="room-resonate-count">{resonanceCount}</span>
+            </button>
+          </div>
+
           <AudioControls playRef={playBtn} />
-          <div className="room-presave">
-            <a
-              href={SPOTIFY_PRESAVE_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="link-presave"
-              aria-label="Pre-save ODUVIL on Spotify"
-            >
-              <SpotifyIcon />
-              <span className="link-presave-name">SPOTIFY</span>
-              <span className="link-presave-meta">PRE-SAVE</span>
-              <svg className="link-presave-arrow" width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor">
-                <path d="M1 9L9 1M9 1H3M9 1V7" strokeWidth="1" strokeLinecap="square" />
-              </svg>
-            </a>
-            <a
-              href={APPLE_MUSIC_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="link-presave"
-              aria-label="Pre-add ODUVIL on Apple Music"
-            >
-              <AppleMusicIcon />
-              <span className="link-presave-name">APPLE MUSIC</span>
-              <span className="link-presave-meta">PRE-ADD</span>
-              <svg className="link-presave-arrow" width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor">
-                <path d="M1 9L9 1M9 1H3M9 1V7" strokeWidth="1" strokeLinecap="square" />
-              </svg>
-            </a>
+
+          <div className="room-presave-section">
+            <div className="room-presave">
+              <a
+                href={SPOTIFY_PRESAVE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="link-presave"
+                aria-label="Pre-save ODUVIL on Spotify"
+                onClick={() => telemetry.recordPresave('spotify')}
+              >
+                <SpotifyIcon />
+                <span className="link-presave-name">SPOTIFY</span>
+                <span className="link-presave-meta">PRE-SAVE</span>
+                <svg className="link-presave-arrow" width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor">
+                  <path d="M1 9L9 1M9 1H3M9 1V7" strokeWidth="1" strokeLinecap="square" />
+                </svg>
+              </a>
+              <a
+                href={APPLE_MUSIC_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="link-presave"
+                aria-label="Pre-add ODUVIL on Apple Music"
+                onClick={() => telemetry.recordPresave('apple')}
+              >
+                <AppleMusicIcon />
+                <span className="link-presave-name">APPLE MUSIC</span>
+                <span className="link-presave-meta">PRE-ADD</span>
+                <svg className="link-presave-arrow" width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor">
+                  <path d="M1 9L9 1M9 1H3M9 1V7" strokeWidth="1" strokeLinecap="square" />
+                </svg>
+              </a>
+              <button
+                type="button"
+                className="link-presave link-presave--story"
+                onClick={() => onOpenPass(id)}
+              >
+                <span className="link-presave-name">OBSERVER PASS</span>
+                <span className="link-presave-meta">9:16 STORY ↗</span>
+              </button>
+            </div>
+
+            <div className="room-presave-status">
+              <span className="telemetry-live-dot" aria-hidden="true" />
+              <span>
+                OBSERVER #{observerNumber} · {presaveCount.toLocaleString()} OBSERVERS LOGGED ({activeNow} ACTIVE NOW)
+              </span>
+            </div>
+          </div>
+
+          {/* Classified Transmission / Lyric & Mystery Title Gate */}
+          <div
+            className="room-transmission"
+            data-unlocked={isDecrypted || undefined}
+            onClick={!isDecrypted ? () => telemetry.decryptTrack(id) : undefined}
+            style={{ cursor: !isDecrypted ? 'pointer' : 'default' }}
+          >
+            <div className="room-transmission-note">{transmission.fieldNote}</div>
+            <div className="room-transmission-secret">
+              <div className="room-transmission-header">
+                <span className="room-transmission-tag">
+                  {isDecrypted ? `✓ ${transmission.classifiedLabel}` : `🔒 ${transmission.classifiedLabel}`}
+                </span>
+                {!isDecrypted && (
+                  <span className="room-transmission-hint">TAP OR PRE-SAVE TO DECRYPT</span>
+                )}
+              </div>
+              <p className="room-transmission-cipher">
+                {transmission.classifiedText}
+              </p>
+            </div>
           </div>
         </div>
       </div>
