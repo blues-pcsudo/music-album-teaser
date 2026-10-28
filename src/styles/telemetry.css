@@ -89,113 +89,49 @@
   color: var(--c-fg);
 }
 
-/* --- Pre-save Telemetry & Milestone Progress Bar --- */
-.telemetry-presave {
-  display: flex;
-  flex-direction: column;
+/* --- Minimal Story Card Trigger --- */
+.telemetry-story-link {
+  display: inline-flex;
   align-items: center;
   gap: 0.55rem;
-  width: 100%;
-  max-width: 440px;
-  padding: 0.75rem 1rem;
-  border: 1px solid rgba(232, 226, 214, 0.12);
-  background: rgba(232, 226, 214, 0.02);
-}
-
-.telemetry-presave[data-presaved] {
-  border-color: rgba(232, 226, 214, 0.32);
-  background: rgba(232, 226, 214, 0.045);
-}
-
-.telemetry-presave-row {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 0.5rem;
   font-family: var(--font-mono);
-  font-size: 0.62rem;
-  letter-spacing: 0.14em;
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  color: var(--c-fg-dim);
+  background: none;
+  border: none;
+  border-bottom: 1px solid rgba(232, 226, 214, 0.22);
+  padding: 0.2rem 0.15rem 0.35rem;
+  cursor: pointer;
+  transition: color var(--t-fast), border-color var(--t-fast);
+}
+
+.telemetry-story-link:hover,
+.telemetry-story-link:focus-visible {
   color: var(--c-fg);
+  border-bottom-color: var(--c-fg);
+}
+
+.telemetry-story-arrow {
+  font-size: 0.65rem;
+  color: var(--c-fg-dimmer);
+  transition: transform var(--t-fast), color var(--t-fast);
+}
+
+.telemetry-story-link:hover .telemetry-story-arrow,
+.telemetry-story-link:focus-visible .telemetry-story-arrow {
+  color: var(--c-fg);
+  transform: translate(2px, -2px);
 }
 
 .telemetry-live-dot {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
   background-color: #d4cbb8;
   box-shadow: 0 0 8px rgba(232, 226, 214, 0.9);
   display: inline-block;
   animation: pulse-glow 2s infinite ease-in-out;
-}
-
-.telemetry-presave-count strong {
-  font-weight: 600;
-  color: #fff;
-}
-
-.telemetry-sep {
-  color: var(--c-stroke);
-}
-
-.telemetry-milestone-hint {
-  color: var(--c-fg-dim);
-}
-
-.telemetry-badge-logged {
-  color: #fff;
-  background: rgba(232, 226, 214, 0.12);
-  padding: 0.15rem 0.45rem;
-  border: 1px solid rgba(232, 226, 214, 0.3);
-}
-
-.telemetry-bar {
-  width: 100%;
-  height: 2px;
-  background: var(--c-stroke);
-  position: relative;
-  overflow: hidden;
-}
-
-.telemetry-bar-fill {
-  height: 100%;
-  background: var(--c-fg);
-  transition: width 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-.telemetry-presave-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  width: 100%;
-  font-family: var(--font-mono);
-  font-size: 0.54rem;
-  letter-spacing: 0.12em;
-  color: var(--c-fg-dimmer);
-}
-
-.telemetry-pass-trigger {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  font-family: var(--font-mono);
-  font-size: 0.55rem;
-  letter-spacing: 0.14em;
-  color: var(--c-fg);
-  background: none;
-  border: none;
-  border-bottom: 1px solid rgba(232, 226, 214, 0.35);
-  padding: 0 0 1px 0;
-  cursor: pointer;
-  flex-shrink: 0;
-  transition: color var(--t-fast), border-color var(--t-fast);
-}
-
-.telemetry-pass-trigger:hover,
-.telemetry-pass-trigger:focus-visible {
-  color: #fff;
-  border-bottom-color: #fff;
 }
 
 /* --- TrackIndex Resonance & Peak Star --- */
@@ -584,17 +520,9 @@
     max-width: calc(100% - 5.5rem);
   }
 
-  .telemetry-presave {
-    padding: 0.5rem 0.7rem;
-    gap: 0.4rem;
-  }
-
-  .telemetry-presave-row {
-    font-size: 0.55rem;
-  }
-
-  .telemetry-presave-footer {
-    font-size: 0.48rem;
+  .telemetry-story-link {
+    font-size: 0.54rem;
+    letter-spacing: 0.16em;
   }
 
   .room-title-row {
